@@ -16,6 +16,8 @@ services:
     - "2181:2181"
     environment:
       ZOOKEEPER_CLIENT_PORT: "2181"
+    networks:
+      - kafka-network
 
   kafka0:
     image: confluentinc/cp-kafka:5.2.2
@@ -30,6 +32,8 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
     depends_on:
     - "zookeeper"
+    networks:
+      - kafka-network
 
   schema-registry:
     image: confluentinc/cp-schema-registry:5.2.2
@@ -42,6 +46,8 @@ services:
       SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: "1"
     depends_on:
     - "kafka0"
+    networks:
+      - kafka-network
 
   rest-proxy:
     image: confluentinc/cp-kafka-rest:5.2.2
@@ -55,6 +61,8 @@ services:
     depends_on:
     - "kafka0"
     - "schema-registry"
+    networks:
+      - kafka-network
 
   connect:
     image: confluentinc/cp-kafka-connect:5.2.2
@@ -80,6 +88,8 @@ services:
     depends_on:
     - "kafka0"
     - "schema-registry"
+    networks:
+      - kafka-network
 
   ksql:
     image: confluentinc/cp-ksql-server:5.2.2
@@ -93,6 +103,8 @@ services:
     depends_on:
     - "kafka0"
     - "schema-registry"
+    networks:
+      - kafka-network
 
   connect-ui:
     image: landoop/kafka-connect-ui:0.9.7
@@ -104,6 +116,8 @@ services:
       CONNECT_URL: "http://connect:8083"
     depends_on:
     - "connect"
+    networks:
+      - kafka-network
 
   topics-ui:
     image: landoop/kafka-topics-ui:0.9.4
@@ -115,6 +129,8 @@ services:
       KAFKA_REST_PROXY_URL: "http://rest-proxy:8082"
     depends_on:
     - "rest-proxy"
+    networks:
+      - kafka-network
 
   schema-registry-ui:
     image: landoop/schema-registry-ui:0.9.5
@@ -126,6 +142,8 @@ services:
       SCHEMAREGISTRY_URL: "http://schema-registry:8081/"
     depends_on:
     - "schema-registry"
+    networks:
+      - kafka-network
 
   postgres:
     image: postgres:11
@@ -138,3 +156,9 @@ services:
     volumes:
     - ./producers/data/cta_stations.csv:/tmp/cta_stations.csv
     - ./load_stations.sql:/docker-entrypoint-initdb.d/load_stations.sql
+    networks:
+      - kafka-network
+    
+networks:
+  kafka-network:
+    driver: bridge
