@@ -75,7 +75,7 @@ def run_server():
             is_avro=False,
         ),
         KafkaConsumer(
-            "^com.udacity.station.arrivals.*",
+            "^com.udacity.station.arrivals.v1.*",
             lines.process_message,
             offset_earliest=True,
         ),
